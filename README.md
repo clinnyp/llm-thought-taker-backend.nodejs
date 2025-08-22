@@ -1,1 +1,4 @@
-# llm-thought-taker-backend.nodejs
+```
+npm install
+npm run deploy
+```

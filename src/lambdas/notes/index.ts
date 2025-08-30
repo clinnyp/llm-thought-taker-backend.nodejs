@@ -13,11 +13,14 @@ app.get('/:noteId/users/:externalUserId', async (c) => {
     const noteId = c.req.param('noteId')
     const externalUserId = c.req.param('externalUserId')
 
-    const result = await db.select().from(notes).innerJoin(users, eq(notes.userId, users.id)).where(and(eq(notes.id, noteId), eq(users.externalId, externalUserId)))
-    if (!result) {
+    const userResult = await db.select().from(users).where(eq(users.externalId, externalUserId)).then(res => res[0])
+
+    const noteResult = await db.select().from(notes).where(and(eq(notes.id, noteId), eq(notes.userId, userResult.id))).then(res => res[0])
+
+    if (!noteResult) {
       return c.json({ message: 'Note not found' }, 404)
     }
-    return c.json({ message: "Note Retrieved Successfully", result }, 200)
+    return c.json({ message: "Note Retrieved Successfully", note: noteResult }, 200)
   } catch (error) {
     return c.json({ message: 'Error fetching note', error }, 500)
   }

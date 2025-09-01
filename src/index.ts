@@ -13,6 +13,11 @@ app.use('*', logger())
 app.route('/notes', notesRouter)
 app.route('/users', usersRouter)
 
+// health check
+app.get('/health', (c) => {
+  return c.json({ message: 'OK' }, 200)
+})
+
 // generate chat response
 app.post('/generate_chat', async (c) => {
   try {
@@ -34,15 +39,21 @@ app.post('/generate_chat', async (c) => {
   }
 })
 
-// Local development server
-const port = 3000
-console.log(`Server is running on port ${port}`)
-
-serve({
-  fetch: app.fetch,
-  port
-})
-
 // Lambda handler for AWS deployment
 export const handler = handle(app)
+
+// Export app for testing
 export default app
+
+// Only start local server in development
+if (
+  process.env.NODE_ENV == 'development'
+) {
+  const port = 3001;
+  console.log(`Server is running on port ${port}`);
+
+  serve({
+    fetch: app.fetch,
+    port,
+  });
+}
